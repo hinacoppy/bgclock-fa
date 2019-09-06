@@ -1,0 +1,212 @@
+/* document outline ----------------------------------------- */
+html{
+  height: 100%;
+}
+body{
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  height: 100%;
+  background-color: #efe;
+  font-family: 'Arial', 'Meiryo UI';
+}
+@font-face {
+  /* https://www.keshikan.net/fonts.html */
+  font-family: 'DSEG7-Classic';
+  src: url(../webfonts/DSEG7Classic-BoldItalic.woff);
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+/* Grid Layout settings ------------------------------------- */
+/* 以下すべて相対サイズにし、レスポンシブ対応可能にしておく */
+#container{
+  display: grid; /* Grid Layout でコンテンツを配置 */
+  grid-template-columns: 50% 50%;
+  /*  grid-template-rows は App mode 毎に設定を変えるため、ここでは定義しない */
+  grid-template-areas:
+     'player1 player2'
+     'score1container score2container'
+     'timer1 timer2'
+     'pausebtn settingbtn';
+  align-items: center; /* 子アイテムはデフォで上下左右に中央揃え */
+  justify-items: center;
+}
+#player1{
+  grid-area: player1;
+}
+#player2{
+  grid-area: player2;
+}
+#score1container{
+  grid-area: score1container;
+}
+#score2container{
+  grid-area: score2container;
+}
+#gamemode{
+  grid-area: 1/1/3/3;
+  align-self: start; /* 上揃え */
+}
+#timer1{
+  grid-area: timer1;
+  justify-self: left; /* 左寄せ */
+}
+#timer2{
+  grid-area: timer2;
+  justify-self: right; /* 右寄せ */
+}
+#delay{
+  grid-area: timer1; /* 初期位置はtimer1に重ねる */
+  pointer-events: none; /* タップイベントを無効化(下に透過) */
+}
+#pauseinfo{
+  grid-area: 3/1/4/3;
+}
+#pausebtn{
+  grid-area: pausebtn;
+}
+#settingbtn{
+  grid-area: settingbtn;
+}
+/* grid definitions for App mode -------------------------- */
+.container_full{
+  grid-template-rows: 10% 20% 60% 10%;
+}
+.container_score{
+  grid-template-rows: 10% 80% 0% 10%;
+}
+.container_clock{
+  grid-template-rows: 10% 0% 80% 10%;
+}
+/* object decorations ------------------------------------- */
+.infotext{
+  font-size: 3vw;
+  text-align: center;
+}
+.score{
+  width: 15vw;
+  font-size: 7vw;
+  text-align: center;
+  border-radius: 20%;
+  margin: 0 1vw;
+  background-color: #fdd;
+}
+.score_scoreonly{
+  width: 30vw;
+  font-size: 20vw;
+}
+.timer{
+  font-family: 'DSEG7-Classic', 'Arial Black', 'Meiryo UI';
+  margin: 2vh 1vw;
+  padding: 5vh 0;
+}
+.delay{
+  font-size: 10vw;
+  background-color: rgba( 192, 192, 255, 0.7 );
+  padding: 1vh 1vw;
+  z-index: 2;
+}
+.updownbtn{
+  border: 4px solid;
+  border-radius: 10vw;
+}
+.oparationbtn{
+  padding: 2vh 6vw;
+  border: 4px solid;
+  border-radius: 4vw;
+  margin-top: 1vh;
+}
+.btnenable{
+  background-color: #adf;
+  border-color: #29f;
+  color: #29f;
+}
+.btndisable{
+  background-color: #ddd;
+  border-color: #aaa;
+  color: #aaa;
+}
+.teban{
+  background-color: #ffa;
+  font-size: 18vw;
+  z-index: 1;
+}
+.noteban{
+  background-color: #999;
+  font-size: 10vw;
+}
+.teban_pause{
+  background-color: #999;
+  font-size: 14vw;
+}
+.lose{
+  color: #f00;
+}
+.scorecontainer{
+  display: flex;
+  align-items: center;
+}
+.pauseinfo{
+  font-size: 2vw;
+  border: 4px solid;
+  border-radius: 10vw;
+  background-color: #999;
+  color: #00f;
+  z-index: 3;
+}
+/* settingwindow decorations ------------------------------------- */
+#settingwindow{
+  position: absolute;
+  display: none;
+  z-index: 5;
+}
+#settingwindow input,select{
+  font-size: 100%;
+}
+.popupwindow{
+  background-color: #dff;
+  border: 3px solid #00f;
+  padding: 2vh 4vw;
+  font-size: 1.8vw;
+}
+.popuptitle{
+  font-size: 2.2vw;
+  color: #fff;
+  background-color: #46f;
+  padding: 2vh 2vw;
+  margin-bottom: 2vh;
+}
+/* toggle switch ----------------------------------------- */
+.switch  {
+  display: none; /* 標準のチェックボックスを非表示に */
+}
+.slider:before {
+  color: #999;
+}
+input:checked + .slider:before {
+  color: #29f;
+  content: "\f205"; /* fa-toggle-on */
+}
+/* Segmented Control ----------------------------------------- */
+/* (参考) https://ginpen.com/2012/12/11/segmented-control/ */
+.segmented {
+    display: inline-block;
+}
+.segmented .label {
+    background-color: #eee;
+    border: 1px solid #aaa;
+    color: #888;
+    float: left;
+    padding: 0.5em 1em;
+    text-align: center;
+    width: 12vw;
+}
+.segmented input {
+    display: none;
+}
+.segmented input:checked + .label {
+    background-color: #29f;
+    color: #fff;
+}
