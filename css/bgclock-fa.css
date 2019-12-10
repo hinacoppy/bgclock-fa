@@ -1,6 +1,11 @@
 /* document outline ----------------------------------------- */
+*{
+  user-select:none; /* タップ、ドラッグで文字選択しないように */
+}
 html{
-  height: 100%;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none; /* バウンススクロールを抑止(only for Android) */
 }
 body{
   margin: 0;

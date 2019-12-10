@@ -7,10 +7,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
   <meta name="description" content="Backgammon Clock and Score board App">
   <meta name="author" content="(C)hinacoppy 2018">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/bgclock-fa.css">
   <link rel="stylesheet" href="css/fontawesome.all.min.css">
-  <link rel="icon" href="./favicon.ico">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="icon" href="icon/favicon.ico">
+  <link rel="apple-touch-icon" href="icon/apple-touch-icon.png">
   <title>bgclock</title>
 </head>
 <body>
@@ -157,5 +158,15 @@
 
 <script src="js/jquery-3.4.1.min.js"></script>
 <script src="js/bgclock.js"></script>
+<script>
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.register("./serviceWorker.js")
+    .then(function(registration) {
+      registration.update();
+    }).catch(function(error) {
+      console.warn("serviceWorker error.", error);
+    });
+}
+</script>
 </body>
 </html>
