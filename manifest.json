@@ -3,7 +3,7 @@
   "short_name": "bgclock-fa",
   "start_url": "/bgclock-fa/index.html",
   "scope": "/bgclock-fa/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#efe",
   "theme_color": "#efe",
   "description": "バックギャモンクロックアプリ",
