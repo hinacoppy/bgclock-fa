@@ -16,6 +16,7 @@ const STATIC_FILES = [
   ORIGIN + '/bgclock-fa/css/bgclock-fa.css',
   ORIGIN + '/bgclock-fa/css/fontawesome.all.min.css',
   ORIGIN + '/bgclock-fa/js/bgclock.js',
+  ORIGIN + '/bgclock-fa/js/start-serviceWorker.js',
   ORIGIN + '/bgclock-fa/js/jquery-3.4.1.min.js',
   ORIGIN + '/bgclock-fa/sounds/decision1.mp3',
   ORIGIN + '/bgclock-fa/sounds/decision7.mp3',
