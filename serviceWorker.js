@@ -1,7 +1,7 @@
 /* serviceWorker.js */
 'use strict';
 
-const CACHE_NAME = "bgclock-fa-v1";
+const CACHE_NAME = "bgclock-fa-v20210623";
 const ORIGIN = (location.hostname == 'localhost') ? '' : location.protocol + '//' + location.hostname;
 
 const STATIC_FILES = [
@@ -14,15 +14,15 @@ const STATIC_FILES = [
   ORIGIN + '/bgclock-fa/icon/android-chrome-192x192.png',
   ORIGIN + '/bgclock-fa/icon/android-chrome-512x512.png',
   ORIGIN + '/bgclock-fa/css/bgclock-fa.css',
-  ORIGIN + '/bgclock-fa/css/fontawesome.all.min.css',
   ORIGIN + '/bgclock-fa/js/bgclock.js',
-  ORIGIN + '/bgclock-fa/js/start-serviceWorker.js',
-  ORIGIN + '/bgclock-fa/js/jquery-3.4.1.min.js',
   ORIGIN + '/bgclock-fa/sounds/decision1.mp3',
   ORIGIN + '/bgclock-fa/sounds/decision7.mp3',
   ORIGIN + '/bgclock-fa/sounds/warning2.mp3',
   ORIGIN + '/bgclock-fa/webfonts/DSEG7Classic-BoldItalic.woff',
-  ORIGIN + '/bgclock-fa/webfonts/fa-solid-900.woff2'
+  ORIGIN + '/bgclock-fa/webfonts/fa-solid-900.woff2',
+  ORIGIN + '/css/fontawesome.all.min.css',
+  ORIGIN + '/js/jquery-3.6.0.min.js',
+  ORIGIN + '/js/start-serviceWorker.js'
 ];
 
 const CACHE_KEYS = [
