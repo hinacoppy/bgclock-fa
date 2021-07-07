@@ -1,4 +1,5 @@
 // Backgammon Clock and Score board App 用 JavaScript
+'use strict';
 
   //広域変数
   var score = [0, 0, 0]; //スコアを初期設定。引数を1,2として使うため、配列要素は3つ用意
@@ -13,83 +14,91 @@
   var pauseflg = true; //pause状態で起動する
   var timeoutflg = false;
   var settingwindowflg = false;
-  var clock; //タイマ用変数
+  var clockobj; //タイマ用変数
   var clockspd = 1000; //msec どこまでの精度で時計を計測するか
                        //1000の約数でないと時計の進みがいびつになり、使いにくい
                        //200msecだと残時間管理が精密になるがブラウザのCPU負荷が上がる
   var gamemodestr = "Match game to "+ matchlength;
   var soundflg = true;
   var vibrationflg = false; //バイブレーションの初期設定は無効
-  var iosflg = is_iOS();
-  if (iosflg) { $("#tr_vibration").css("display", "none"); } //iOSのときはバイブレーションの設定項目を表示しない
+  if (is_iOS()) { $("#tr_vibration").hide(); } //iOSのときはバイブレーションの設定項目を表示しない
+  var settings = {}; //設定内容を保持するオブジェクト
 
 //イベントハンドラの定義
 $(function() {
 
   //設定画面の[APPLY] ボタンがクリックされたとき
-  $("#applybtn").on('click', function(e) {
+  $("#applybtn").on('click', function() {
     settingwindowflg = false;
     set_initial_vars();
     $("#settingwindow").slideUp("normal");
+    $("#settingbtn,#pausebtn,#score1up,#score1dn,#score2up,#score2dn").removeClass("btndisable"); //ボタンクリックを有効化
   });
 
   //設定画面の[CANCEL] ボタンがクリックされたとき
-  $("#cancelbtn").on('click', function(e) {
+  $("#cancelbtn").on('click', function() {
     settingwindowflg = false;
-    $("#settingwindow").slideUp("normal"); //設定画面を消す
+    $("#settingwindow").slideUp("normal", () => load_settings()); //設定画面を消す、消した後に設定画面表示時の設定内容に戻す
+    $("#settingbtn,#pausebtn,#score1up,#score1dn,#score2up,#score2dn").removeClass("btndisable"); //ボタンクリックを有効化
   });
 
   //メイン画面の[SETTING] ボタンがクリックされたとき
-  $("#settingbtn").on('click', function(e) {
+  $("#settingbtn").on('click', function() {
     if ($(this).hasClass("btndisable")) { return; } //disableのときは何もしない
     settingwindowflg = true;
-    topleft = winposition( $("#settingwindow") );
-    $("#settingwindow").css(topleft).slideDown("normal"); //画面表示
+    const topleft = winposition( $("#settingwindow") );
+    $("#settingwindow").css(topleft).slideDown("normal", () => save_settings()); //画面表示、現状の設定内容を保存
+    $("#settingbtn,#pausebtn,#score1up,#score1dn,#score2up,#score2dn").addClass("btndisable"); //ボタンクリックを無効化
   });
 
   //メイン画面の[PAUSE] ボタンがクリックされたとき
-  $("#pausebtn").on('click', function(e) {
-    if (turn == 0) { return; } //どちらの手番でもない場合は何もしない
+  $("#pausebtn").on('click', function() {
+    if (turn == 0 || timeoutflg) { return; } //どちらの手番でもない or タイマ切れのときは何もしない
     if (pauseflg) { //PAUSE -> PLAY
       pause_out();
-      nonturn = turn==1 ? 2 : 1; //手番じゃないほう
-      $("#timer"+turn).removeClass("noteban teban_pause").addClass("teban");
-      $("#timer"+nonturn).removeClass("teban teban_pause").addClass("noteban");
+      const nonturn = turn==1 ? 2 : 1; //手番じゃないほう
+      $("#timer" + turn).removeClass("noteban teban_pause").addClass("teban");
+      $("#timer" + nonturn).removeClass("teban teban_pause").addClass("noteban");
       startTimer(turn); //現在の持ち時間からクロック再開
     } else { //PLAY -> PAUSE
       pause_in();
       stopTimer();
     }
-    sound("pause"); vibration("pause");
+    sound_vibration("pause");
   });
 
   //クロックの場所がクリック(タップ)されたとき
   $("#timer1,#timer2").on('touchstart mousedown', function(e) {
     e.preventDefault(); // touchstart以降のイベントを発生させない
     if (timeoutflg || settingwindowflg) { return; } //タイマ切れ状態 or 設定画面のときは何もしない
-    idname = $(this).attr("id");
+    const idname = $(this).attr("id");
     tap_timerarea(idname);
   });
 
   //スコア操作のボタンがクリックされたとき
-  $("#score1up,#score1dn,#score2up,#score2dn").on('click', function(e) {
+  $("#score1up,#score1dn,#score2up,#score2dn").on('click', function() {
     if ($(this).hasClass("btndisable") || settingwindowflg) { return; } //disableのときは何もしない
-    idname = $(this).attr("id");
+    const idname = $(this).attr("id");
     modify_score(idname);
+  });
+
+  $("#matchlength,#allotedtimemin").on('change', function() {
+    const allotedtimemin = get_allowtimemin();
+    $("#allotedtime").text(allotedtimemin);
   });
 
 }); //close to $(function() {
 
 //スコア操作ボタンによるスコア設定
 function modify_score(idname) {
-  player = Number(idname.substr(5,1));
-  updn   = idname.substr(6,1);
-
-  delta = updn=="u" ? +1 : updn=="d" ? -1 : 0; //押されたボタンを判断し、増減を決める
+  const player = Number(idname.substr(5, 1));
+  const updn = idname.substr(6, 1);
+  const delta = updn == "u" ? +1 : updn == "d" ? -1 : 0; //押されたボタンを判断し、増減を決める
   score[player] += delta;
   if (score[player] < 0) { score[player] = 0; }
 
   //Crawfordかどうかを判断
+  let cfstr;
   if (matchlength - score[player] == 1 && crawford == 0) {
     crawford = 1; cfplayer = player; cfstr = "Crawford";
   } else if (crawford == 2 || (crawford == 1 && cfplayer != player)) {
@@ -110,22 +119,18 @@ function set_initial_vars() {
   score = [0, 0, 0];
   $("#score1").text(score[1]);
   $("#score2").text(score[2]);
-  matchlength = $("#matchlength").val();
+  matchlength = Number($("#matchlength").val());
   crawford = 0;
-  if (matchlength == 0) { //unlimited
-    gamemodestr = "Unlimited game";
-  } else {
-    gamemodestr = "Match game to "+ matchlength;
-  }
+  gamemodestr = (matchlength == 0) ? "Unlimited game" : "Match game to " + matchlength;
   $("#gamemode").text(gamemodestr);
   delaytime = Number($("#delaytime").val());
-  $("#delay").text(("00"+delaytime).substr(-2));
-  allotedtime = Number($("#allotedtimemin").val()) * 60;
+  $("#delay").text(("00" + delaytime).substr(-2));
+  allotedtime = get_allowtimemin() * 60;
   timer = [0, allotedtime, allotedtime];
   disp_timer(1, timer[1]);
   disp_timer(2, timer[2]);
   turn = 0; //手番をリセット
-  appmode = $("[name=appmode]:checked").val();
+  const appmode = $("[name=appmode]:checked").val();
   switch (appmode) {
   case "clock":
     $("#timer1,#timer2,#delay,#pauseinfo,#pausebtn").show();
@@ -169,15 +174,15 @@ function pause_out() {
 
 //クロックを表示
 function disp_timer(turn, time) {
-  min = Math.floor(time / 60);
-  sec = Math.floor(time % 60);
-  timestr = ("00" + min).substr(-2) + ":" + ("00" + sec).substr(-2);
-  $("#timer"+turn).text(timestr);
+  const min = Math.floor(time / 60);
+  const sec = Math.floor(time % 60);
+  const timestr = ("00" + min).substr(-2) + ":" + ("00" + sec).substr(-2);
+  $("#timer" + turn).text(timestr);
 }
 
 //クロック表示場所をクリック(タップ)したときの処理
 function tap_timerarea(idname) {
-  tappos = Number(idname.substr(5,1));
+  const tappos = Number(idname.substr(5, 1));
   //クロック稼働中で相手側(グレーアウト側)をクリックしたときは何もしない
   //＝相手の手番、またはポーズのときは以下の処理を実行
   if (turn != tappos && pauseflg == false) { return; }
@@ -185,29 +190,29 @@ function tap_timerarea(idname) {
   if (pauseflg) { //ポーズ状態のときはポーズを解除
     pause_out();
   }
-  turn = ( tappos==1 ? 2 : tappos==2 ? 1 : 0 ); //手番切替え
-  sound("tap"+turn); vibration("tap");
+  turn = tappos == 1 ? 2 : tappos == 2 ? 1 : 0; //手番切替え
+  sound_vibration("tap");
 
   stopTimer(); //自分方のクロックを止める
 
   delay = delaytime; //保障時間を設定して表示
-  $("#delay").text(("00"+delay).substr(-2)).show();
+  $("#delay").text(("00" + delay).substr(-2)).show();
 
   startTimer(turn); //相手方のクロックをスタートさせる
 
   //クロックの稼働/停止を切替え
-  nonturn = turn==1 ? 2 : 1; //手番じゃないほう
-  $("#timer"+turn).removeClass("noteban teban_pause").addClass("teban");
-  $("#timer"+nonturn).removeClass("teban teban_pause").addClass("noteban");
+  const nonturn = turn==1 ? 2 : 1; //手番じゃないほう
+  $("#timer" + turn).removeClass("noteban teban_pause").addClass("teban");
+  $("#timer" + nonturn).removeClass("teban teban_pause").addClass("noteban");
   $("#delay").css("grid-area", "timer"+turn); //delay表示位置を移動
 }
 
 function startTimer(turn) {
-  clock = setInterval(function(){countdown(turn);}, clockspd);
+  clockobj = setInterval(() => countdown(turn), clockspd);
 }
 
 function stopTimer() {
-  clearInterval(clock);
+  clearInterval(clockobj);
 }
 
 //クロックをカウントダウン
@@ -215,29 +220,37 @@ function countdown(turn) {
   if (delay > 0) {
     //保障時間内
     delay -= clockspd / 1000;
-    $("#delay").text(("00"+Math.floor(delay)).substr(-2));
+    $("#delay").text(("00" + Math.floor(delay)).substr(-2));
   } else {
     //保障時間切れ後
     $("#delay").hide();
     timer[turn] -= clockspd / 1000;
-    if (timer[turn] <= 0) { timeup_lose(turn); return; } //切れ負け処理
     disp_timer(turn, timer[turn]);
+    if (timer[turn] <= 0) { //切れ負け処理
+      timeup_lose(turn);
+    }
   }
 }
 
 //切れ負け処理
 function timeup_lose(turn) {
-  $("#timer"+turn).text("LOSE").addClass("lose");
+  $("#timer" + turn).text("LOSE").addClass("lose");
   stopTimer();
   timeoutflg = true;
   pause_in(); //ポーズ状態に遷移
-  sound("buzzer"); vibration("buzzer");
+  sound_vibration("buzzer");
+}
+
+//音とバイブレーション
+function sound_vibration(type) {
+  sound(type);
+  vibration(type);
 }
 
 //音を鳴らす
 function sound(type) {
   if (soundflg) {
-    var audio = $('#'+type).get(0); //音の種類は引数で指定
+    const audio = $('#' + type).get(0); //音の種類は引数で指定
     //audio.load(); //連続再生に対応
     audio.play();
   }
@@ -246,28 +259,51 @@ function sound(type) {
 //バイブレーション
 function vibration(type) {
   if (vibrationflg) {
-    switch (type) {
-    case "tap":
-      navigator.vibrate( 50 );  break;
-    case "pause":
-      navigator.vibrate( [50, 50, 100] );  break;
-    case "buzzer":
-      navigator.vibrate( 1000 ); break;
-    }
+    const vibrationdata = {tap: 50, pause: [50, 50, 100], buzzer: 1000};
+    navigator.vibrate(vibrationdata[type]);
   }
 }
 
 //画面中央に表示するための左上座標を計算
 function winposition(winobj) {
-  wx = $(document).scrollLeft() + ($(window).width() - winobj.outerWidth()) / 2;
+  let wx = $(document).scrollLeft() + ($(window).width() - winobj.outerWidth()) / 2;
   if (wx < 0) { wx = 0; }
-  wy = $(document).scrollTop() + ($(window).height() - winobj.outerHeight()) / 2;
+  let wy = $(document).scrollTop() + ($(window).height() - winobj.outerHeight()) / 2;
   if (wy < 0) { wy = 0; }
   return {top:wy, left:wx};
 }
 
 //UserAgentを確認し、iOSか否かを判断する
 function is_iOS() {
-  ua = window.navigator.userAgent.toLowerCase();
+  const ua = window.navigator.userAgent.toLowerCase();
   return (ua.indexOf('iphone') !== -1 || ua.indexOf('ipod') !== -1 || ua.indexOf('ipad') !== -1);
 }
+
+function get_allowtimemin() {
+  const allotedtime = Math.ceil(Number($("#matchlength").val()) * Number($("#allotedtimemin").val()));
+  return (allotedtime == 0) ? 99 : allotedtime; //Unlimitedの時は99分とする(表示上の最大値)
+}
+
+function save_settings() {
+  settings.matchlength    = $("#matchlength").val();
+  settings.playername1    = $("#playername1").val();
+  settings.playername2    = $("#playername2").val();
+  settings.allotedtimemin = $("#allotedtimemin").val();
+  settings.delaytime      = $("#delaytime").val();
+  settings.sound          = $("[name=sound]").prop("checked");
+  settings.vibration      = $("[name=vibration]").prop("checked");
+  settings.appmode        = $('[name=appmode]:checked').val();
+}
+
+function load_settings() {
+  $("#matchlength")    .val(settings.matchlength);
+  $("#playername1")    .val(settings.playername1);
+  $("#playername2")    .val(settings.playername2);
+  $("#allotedtimemin") .val(settings.allotedtimemin);
+  $("#delaytime")      .val(settings.delaytime);
+  $("[name=sound]")    .prop("checked", settings.sound);
+  $("[name=vibration]").prop("checked", settings.vibration);
+  $("#allotedtime")    .text(get_allowtimemin());
+  $('[value="' +settings.appmode + '"]').prop("checked", true);
+}
+
