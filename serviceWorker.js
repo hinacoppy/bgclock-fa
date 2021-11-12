@@ -1,7 +1,7 @@
 /* serviceWorker.js */
 'use strict';
 
-const CACHE_NAME = "bgclock-fa-v20210623";
+const CACHE_NAME = "bgclock-fa-v20211112";
 const ORIGIN = (location.hostname == 'localhost') ? '' : location.protocol + '//' + location.hostname;
 
 const STATIC_FILES = [
@@ -19,8 +19,7 @@ const STATIC_FILES = [
   ORIGIN + '/bgclock-fa/sounds/decision7.mp3',
   ORIGIN + '/bgclock-fa/sounds/warning2.mp3',
   ORIGIN + '/bgclock-fa/webfonts/DSEG7Classic-BoldItalic.woff',
-  ORIGIN + '/bgclock-fa/webfonts/fa-solid-900.woff2',
-  ORIGIN + '/css/fontawesome.all.min.css',
+  ORIGIN + '/js/fontawesome-all.min.js',
   ORIGIN + '/js/jquery-3.6.0.min.js',
   ORIGIN + '/js/start-serviceWorker.js'
 ];
