@@ -187,38 +187,43 @@ button{
   margin-bottom: 2vh;
 }
 /* toggle switch ----------------------------------------- */
-.switch  {
-  display: none; /* 標準のチェックボックスを非表示に */
+/* (参考) https://www.w3schools.com/howto/howto_css_switch.asp */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 4em;
+  height: 2em;
+  background-color: #dff;
 }
-.togglelabel {
-  display:inline-block;
-  width:auto;
-  position:relative;
-  padding:15px 30px 15px 62px;
-  border:3px solid #fff;
-  border-radius:100px;
-  color:#fff;
-  background-color:#999;
-  white-space:nowrap;
-  transition:background-color .2s, box-shadow .2s;
+.switch input {
+  display: none;
 }
-.togglelabel::before {
-  content:'';
-  display:block;
-  position:absolute;
-  top:10px;
-  bottom:10px;
-  left:10px;
-  width:32px;
-  border:3px solid #fff;
-  border-radius:100px;
-  transition:background-color .2s;
+.slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: .3s;
+  border-radius: 1.6em; /* Rounded sliders */
+  background-color: #999;
 }
-.switch:checked + label {
-  background-color:#29f;
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.6em;
+  width: 1.6em;
+  left: 0.2em;
+  bottom: 0.2em;
+  transition: .3s;
+  border-radius: 50%;
+  background-color: #fff;
 }
-.switch:checked + label::before {
-  background-color:#fff;
+input:checked + .slider {
+  background-color: #29f;
+}
+input:checked + .slider:before {
+  transform: translateX(2.0em);
 }
 /* Segmented Control ----------------------------------------- */
 /* (参考) https://ginpen.com/2012/12/11/segmented-control/ */
